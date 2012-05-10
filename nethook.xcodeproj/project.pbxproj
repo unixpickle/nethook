@@ -14,10 +14,12 @@
 /* Begin PBXFileReference section */
 		FA48B45D155C722B009CA161 /* nethook.kext */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = nethook.kext; sourceTree = BUILT_PRODUCTS_DIR; };
 		FA48B461155C722B009CA161 /* Kernel.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Kernel.framework; path = System/Library/Frameworks/Kernel.framework; sourceTree = SDKROOT; };
-		FA48B464155C722B009CA161 /* nethook-Info.plist */ = {isa = PBXFileReference; path = "nethook-Info.plist"; sourceTree = "<group>"; };
+		FA48B464155C722B009CA161 /* nethook-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "nethook-Info.plist"; sourceTree = "<group>"; };
 		FA48B466155C722B009CA161 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		FA48B468155C722B009CA161 /* nethook.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = nethook.c; sourceTree = "<group>"; };
-		FA48B46A155C722B009CA161 /* nethook-Prefix.pch */ = {isa = PBXFileReference; path = "nethook-Prefix.pch"; sourceTree = "<group>"; };
+		FA48B46A155C722B009CA161 /* nethook-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "nethook-Prefix.pch"; sourceTree = "<group>"; };
+		FA48B473155C76A7009CA161 /* ANSocketList.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ANSocketList.c; sourceTree = "<group>"; };
+		FA48B474155C7787009CA161 /* defines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = defines.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,6 +69,8 @@
 		FA48B462155C722B009CA161 /* nethook */ = {
 			isa = PBXGroup;
 			children = (
+				FA48B474155C7787009CA161 /* defines.h */,
+				FA48B473155C76A7009CA161 /* ANSocketList.c */,
 				FA48B468155C722B009CA161 /* nethook.c */,
 				FA48B463155C722B009CA161 /* Supporting Files */,
 			);

@@ -9,6 +9,6 @@
 #ifndef nethook_defines_h
 #define nethook_defines_h
 
-
+#define kBundleID "com.aqnichol.nethook"
 
 #endif
