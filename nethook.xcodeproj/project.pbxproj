@@ -20,6 +20,7 @@
 		FA48B46A155C722B009CA161 /* nethook-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "nethook-Prefix.pch"; sourceTree = "<group>"; };
 		FA48B473155C76A7009CA161 /* ANSocketList.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ANSocketList.c; sourceTree = "<group>"; };
 		FA48B474155C7787009CA161 /* defines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = defines.h; sourceTree = "<group>"; };
+		FA48B475155C7E11009CA161 /* socketfilter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = socketfilter.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,6 +71,7 @@
 			isa = PBXGroup;
 			children = (
 				FA48B474155C7787009CA161 /* defines.h */,
+				FA48B475155C7E11009CA161 /* socketfilter.h */,
 				FA48B473155C76A7009CA161 /* ANSocketList.c */,
 				FA48B468155C722B009CA161 /* nethook.c */,
 				FA48B463155C722B009CA161 /* Supporting Files */,

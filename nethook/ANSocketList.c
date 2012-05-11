@@ -11,7 +11,7 @@
 typedef struct {
     socket_t socket;
     char addr[64];
-    void * next, * last;
+    void * next;
 } ANSocketList;
 
 static ANSocketList * ANSocketListCreate(OSMallocTag tag) {
@@ -21,27 +21,35 @@ static ANSocketList * ANSocketListCreate(OSMallocTag tag) {
     return list;
 }
 
-static void ANSocketListAdd(OSMallocTag tag, ANSocketList * first, socket_t socket) {
+static ANSocketList * ANSocketListAdd(OSMallocTag tag, ANSocketList * first, socket_t socket) {
     ANSocketList * newList = ANSocketListCreate(tag);
     newList->socket = socket;
+    
     ANSocketList * last = first;
     while (last->next) last = last->next;
-    last->next = newList;
+    
+    last->next = newList;    
+    return newList;
 }
 
-static void ANSocketListDelete(OSMallocTag tag, ANSocketList * obj) {
-    if (obj->last) {
-        ((ANSocketList *)obj->last)->next = obj->next;
-    }
-    if (obj->next) {
-        ((ANSocketList *)obj->next)->last = obj->last;
+static void ANSocketListDelete(OSMallocTag tag, ANSocketList * first, ANSocketList * obj) {
+    if (!obj) return;
+    ANSocketList * list = first;
+    while (list != NULL) {
+        if (list->next == obj) {
+            list->next = obj->next;
+            break;
+        }
+        list = list->next;
     }
     OSFree(obj, sizeof(ANSocketList), tag);
 }
 
 static void ANSocketListFree(OSMallocTag tag, ANSocketList * first) {
-    while (first->next) {
-        ANSocketListDelete(tag, (ANSocketList *)first->next);
+    ANSocketList * node = first;
+    while (node) {
+        ANSocketList * next = (ANSocketList *)node->next;
+        OSFree(node, sizeof(ANSocketList), tag);
+        node = next;
     }
-    ANSocketListDelete(tag, first);
 }

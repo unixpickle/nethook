@@ -10,5 +10,6 @@
 #define nethook_defines_h
 
 #define kBundleID "com.aqnichol.nethook"
+#define kNethookHandlerMain 'ANnh'
 
 #endif
