@@ -160,7 +160,6 @@ static errno_t nh_control_handle_getopt(kern_ctl_ref kctlref, u_int32_t unit, vo
 }
 
 static errno_t nh_control_handle_send(kern_ctl_ref kctlref, u_int32_t unit, void * unitinfo, mbuf_t m, int flags) {
-    debugf("Got data from control!");
     return 0;
 }
 

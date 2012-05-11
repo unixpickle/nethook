@@ -17,6 +17,10 @@
 #include <sys/ioctl.h>
 #include <sys/kern_control.h>
 #include <sys/sys_domain.h>
+#include <netinet/ip.h>
+#include <arpa/inet.h>
+
+#import "NethookControlUser.h"
 
 int openControlSocket (NSString * bundleID);
 
@@ -28,7 +32,21 @@ int main(int argc, const char * argv[]) {
             return -1;
         }
         printf("Connection success!\n");
-        sleep(5);
+        
+        while (true) {
+            ANPacketInfo * info = ANPacketInfoRead(fd);
+            char source[32];
+            char dest[32];
+            struct ip header;
+            
+            memcpy(&header, info->data, MIN(info->length - 8, sizeof(header)));
+            strncpy(source, inet_ntoa(header.ip_src), 32);
+            strncpy(dest, inet_ntoa(header.ip_dst), 32);
+            
+            printf("Got packet from %s to %s\n", source, dest);
+            ANPacketInfoFree(info);
+        }
+        
         close(fd);
     }
     return 0;

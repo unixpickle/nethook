@@ -18,9 +18,9 @@ typedef enum {
     ANPacketProtocolIPv4 = 1
 } ANPacketProtocol;
 
-typedef struct {
-    ANPacketType type;
-    ANPacketProtocol protocol;
+typedef struct __attribute__((__packed__)) {
+    uint16_t type;
+    uint16_t protocol;
     uint32_t length;
     char data[1];
 } ANPacketInfo;

@@ -10,6 +10,7 @@
 
 __private_extern__ ANPacketInfo * ANPacketInfoCreate(OSMallocTag tag, mbuf_t * buf, ANPacketType type, ANPacketProtocol protocol) {
     size_t length = mbuf_len(*buf);
+    if (length == 0) return NULL;
     uint32_t allocSize = (uint32_t)(sizeof(ANPacketInfo) + length) - 1;
     ANPacketInfo * info = (ANPacketInfo *)OSMalloc_noblock(allocSize, tag);
     if (!info) return NULL;
