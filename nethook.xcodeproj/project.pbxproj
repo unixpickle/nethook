@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		FA48B467155C722B009CA161 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = FA48B465155C722B009CA161 /* InfoPlist.strings */; };
 		FA48B469155C722B009CA161 /* nethook.c in Sources */ = {isa = PBXBuildFile; fileRef = FA48B468155C722B009CA161 /* nethook.c */; };
+		FA872309155DCDA90002DE5B /* NethookControlKernel.c in Sources */ = {isa = PBXBuildFile; fileRef = FA872308155DCDA90002DE5B /* NethookControlKernel.c */; };
 		FAB3854B155D9BF9007887EB /* ANControlList.c in Sources */ = {isa = PBXBuildFile; fileRef = FAB3854A155D9BF9007887EB /* ANControlList.c */; };
 		FAB38555155DABEE007887EB /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAB38554155DABEE007887EB /* Foundation.framework */; };
 		FAB38558155DABEE007887EB /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB38557155DABEE007887EB /* main.m */; };
@@ -36,6 +37,8 @@
 		FA48B468155C722B009CA161 /* nethook.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = nethook.c; sourceTree = "<group>"; };
 		FA48B46A155C722B009CA161 /* nethook-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "nethook-Prefix.pch"; sourceTree = "<group>"; };
 		FA48B474155C7787009CA161 /* defines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = defines.h; sourceTree = "<group>"; };
+		FA872308155DCDA90002DE5B /* NethookControlKernel.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = NethookControlKernel.c; sourceTree = "<group>"; };
+		FA87230B155DCE3A0002DE5B /* NethookControlKernel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NethookControlKernel.h; sourceTree = "<group>"; };
 		FAB38548155D9BE4007887EB /* ANControlList.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ANControlList.h; sourceTree = "<group>"; };
 		FAB3854A155D9BF9007887EB /* ANControlList.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ANControlList.c; sourceTree = "<group>"; };
 		FAB3854C155DA6EE007887EB /* control.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = control.h; sourceTree = "<group>"; };
@@ -44,6 +47,8 @@
 		FAB38557155DABEE007887EB /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		FAB3855A155DABEE007887EB /* nethookclient-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "nethookclient-Prefix.pch"; sourceTree = "<group>"; };
 		FAB3855B155DABEE007887EB /* nethookclient.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = nethookclient.1; sourceTree = "<group>"; };
+		FAB38561155DBD37007887EB /* ipfilter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ipfilter.h; sourceTree = "<group>"; };
+		FAB38563155DCC77007887EB /* NethookControl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NethookControl.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,6 +73,7 @@
 		FA48B450155C7229009CA161 = {
 			isa = PBXGroup;
 			children = (
+				FAB38562155DCC62007887EB /* Shared */,
 				FA48B462155C722B009CA161 /* nethook */,
 				FAB38556155DABEE007887EB /* nethookclient */,
 				FA48B45F155C722B009CA161 /* Frameworks */,
@@ -106,6 +112,7 @@
 			children = (
 				FAB3854D155DA72B007887EB /* Control */,
 				FA48B474155C7787009CA161 /* defines.h */,
+				FAB38561155DBD37007887EB /* ipfilter.h */,
 				FA48B468155C722B009CA161 /* nethook.c */,
 				FA48B463155C722B009CA161 /* Supporting Files */,
 			);
@@ -128,6 +135,8 @@
 				FAB38548155D9BE4007887EB /* ANControlList.h */,
 				FAB3854A155D9BF9007887EB /* ANControlList.c */,
 				FAB3854C155DA6EE007887EB /* control.h */,
+				FA87230B155DCE3A0002DE5B /* NethookControlKernel.h */,
+				FA872308155DCDA90002DE5B /* NethookControlKernel.c */,
 			);
 			name = Control;
 			sourceTree = "<group>";
@@ -148,6 +157,14 @@
 				FAB3855A155DABEE007887EB /* nethookclient-Prefix.pch */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		FAB38562155DCC62007887EB /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				FAB38563155DCC77007887EB /* NethookControl.h */,
+			);
+			name = Shared;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -253,6 +270,7 @@
 			files = (
 				FA48B469155C722B009CA161 /* nethook.c in Sources */,
 				FAB3854B155D9BF9007887EB /* ANControlList.c in Sources */,
+				FA872309155DCDA90002DE5B /* NethookControlKernel.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -329,6 +347,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "nethook/nethook-Prefix.pch";
 				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_WARN_UNINITIALIZED_AUTOS = NO;
 				INFOPLIST_FILE = "nethook/nethook-Info.plist";
 				INSTALL_PATH = "$(SYSTEM_LIBRARY_DIR)/Extensions";
 				MODULE_NAME = com.aqnichol.nethook;
@@ -346,6 +365,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "nethook/nethook-Prefix.pch";
 				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_WARN_UNINITIALIZED_AUTOS = NO;
 				INFOPLIST_FILE = "nethook/nethook-Info.plist";
 				INSTALL_PATH = "$(SYSTEM_LIBRARY_DIR)/Extensions";
 				MODULE_NAME = com.aqnichol.nethook;
@@ -363,6 +383,7 @@
 				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "nethookclient/nethookclient-Prefix.pch";
+				GCC_WARN_UNINITIALIZED_AUTOS = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -373,6 +394,7 @@
 				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "nethookclient/nethookclient-Prefix.pch";
+				GCC_WARN_UNINITIALIZED_AUTOS = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -405,6 +427,7 @@
 				FAB3855F155DABEE007887EB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
