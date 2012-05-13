@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		FA48B467155C722B009CA161 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = FA48B465155C722B009CA161 /* InfoPlist.strings */; };
 		FA48B469155C722B009CA161 /* nethook.c in Sources */ = {isa = PBXBuildFile; fileRef = FA48B468155C722B009CA161 /* nethook.c */; };
+		FA7B312715601BC8005F81B6 /* iplog.c in Sources */ = {isa = PBXBuildFile; fileRef = FA7B312615601BC8005F81B6 /* iplog.c */; };
 		FA872309155DCDA90002DE5B /* NethookControlKernel.c in Sources */ = {isa = PBXBuildFile; fileRef = FA872308155DCDA90002DE5B /* NethookControlKernel.c */; };
 		FA87230D155DD4910002DE5B /* NethookControlUser.c in Sources */ = {isa = PBXBuildFile; fileRef = FA87230C155DD4910002DE5B /* NethookControlUser.c */; };
 		FAB3854B155D9BF9007887EB /* ANControlList.c in Sources */ = {isa = PBXBuildFile; fileRef = FAB3854A155D9BF9007887EB /* ANControlList.c */; };
@@ -38,6 +39,8 @@
 		FA48B468155C722B009CA161 /* nethook.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = nethook.c; sourceTree = "<group>"; };
 		FA48B46A155C722B009CA161 /* nethook-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "nethook-Prefix.pch"; sourceTree = "<group>"; };
 		FA48B474155C7787009CA161 /* defines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = defines.h; sourceTree = "<group>"; };
+		FA7B312415601BBF005F81B6 /* iplog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iplog.h; sourceTree = "<group>"; };
+		FA7B312615601BC8005F81B6 /* iplog.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = iplog.c; sourceTree = "<group>"; };
 		FA872308155DCDA90002DE5B /* NethookControlKernel.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = NethookControlKernel.c; sourceTree = "<group>"; };
 		FA87230B155DCE3A0002DE5B /* NethookControlKernel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NethookControlKernel.h; sourceTree = "<group>"; };
 		FA87230C155DD4910002DE5B /* NethookControlUser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = NethookControlUser.c; sourceTree = "<group>"; };
@@ -152,6 +155,8 @@
 				FA87230C155DD4910002DE5B /* NethookControlUser.c */,
 				FAB3855B155DABEE007887EB /* nethookclient.1 */,
 				FAB38559155DABEE007887EB /* Supporting Files */,
+				FA7B312415601BBF005F81B6 /* iplog.h */,
+				FA7B312615601BC8005F81B6 /* iplog.c */,
 			);
 			path = nethookclient;
 			sourceTree = "<group>";
@@ -285,6 +290,7 @@
 			files = (
 				FAB38558155DABEE007887EB /* main.m in Sources */,
 				FA87230D155DD4910002DE5B /* NethookControlUser.c in Sources */,
+				FA7B312715601BC8005F81B6 /* iplog.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

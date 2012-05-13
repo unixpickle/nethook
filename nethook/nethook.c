@@ -160,6 +160,32 @@ static errno_t nh_control_handle_getopt(kern_ctl_ref kctlref, u_int32_t unit, vo
 }
 
 static errno_t nh_control_handle_send(kern_ctl_ref kctlref, u_int32_t unit, void * unitinfo, mbuf_t m, int flags) {
+    ANControlListEntry * entry = (ANControlListEntry *)controlList;
+    lck_mtx_lock(controlMutex);
+    debugf("Appending packet...");
+    ANControlListEntryAppend(mallocTag, entry, m);
+    ANPacketInfo * packet = ANControlListEntryGetPacket(mallocTag, entry);
+    lck_mtx_unlock(controlMutex);
+    if (packet) {
+        // TODO: inject packet here
+        debugf("Got packet");
+        mbuf_t buf;
+        if (mbuf_allocpacket(MBUF_WAITOK, packet->length - 8, NULL, &buf)) {
+            debugf("Warning: failed to allocate IP packet");
+        } else {
+            mbuf_setflags(buf, MBUF_PKTHDR);
+            if (packet->type == ANPacketTypeInbound) {
+                if (ipf_inject_input(buf, filter)) {
+                    debugf("Failed to inject input packet");
+                }
+            } else {
+                if (ipf_inject_output(buf, filter, NULL)) {
+                    debugf("Failed to inject output packet");
+                }
+            }
+        }
+        OSFree(packet, packet->length, mallocTag);
+    }
     return 0;
 }
 

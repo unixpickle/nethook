@@ -83,5 +83,50 @@ __private_extern__ ANControlListEntry * ANControlListEntryCreate(OSMallocTag tag
 }
 
 __private_extern__ void ANControlListEntryFree(OSMallocTag tag, ANControlListEntry * entry) {
+    if (entry->packetBuffer) {
+        OSFree(entry->packetBuffer, entry->bufferLength, tag);
+    }
     OSFree(entry, sizeof(ANControlListEntry), tag);
+}
+
+__private_extern__ errno_t ANControlListEntryAppend(OSMallocTag tag, ANControlListEntry * entry, mbuf_t packet) {
+    size_t packSize = mbuf_len(packet);
+    if (packSize == 0) return 0;
+    char * buffer = (char *)OSMalloc((uint32_t)(packSize + entry->bufferLength), tag);
+    if (!buffer) return ENOMEM;
+    if (entry->packetBuffer) {
+        memcpy(buffer, entry->packetBuffer, entry->bufferLength);
+        OSFree(entry->packetBuffer, entry->bufferLength, tag);
+    }
+    mbuf_copydata(packet, 0, packSize, &buffer[entry->bufferLength]);
+    entry->packetBuffer = buffer;
+    entry->bufferLength += (uint32_t)packSize;
+    return 0;
+}
+
+__private_extern__ ANPacketInfo * ANControlListEntryGetPacket(OSMallocTag tag, ANControlListEntry * entry) {
+    if (entry->bufferLength < 8) return NULL;
+    uint32_t length = ((uint32_t *)entry->packetBuffer)[1];
+    if (length > entry->bufferLength) return NULL;
+    
+    // allocate the packet and copy the buffer into it
+    ANPacketInfo * info = (ANPacketInfo *)OSMalloc(length, tag);
+    if (!info) return NULL;
+    memcpy(info, entry->packetBuffer, length);
+    
+    // move the remaining data back in the buffer
+    if (length == entry->bufferLength) {
+        OSFree(entry->packetBuffer, entry->bufferLength, tag);
+        entry->packetBuffer = NULL;
+        entry->bufferLength = 0;
+    } else {
+        uint32_t newLength = entry->bufferLength - length;
+        char * newBuffer = (char *)OSMalloc(newLength, tag);
+        memcpy(newBuffer, &entry->packetBuffer[length], newLength);
+        OSFree(entry->packetBuffer, entry->bufferLength, tag);
+        entry->packetBuffer = newBuffer;
+        entry->bufferLength = newLength;
+    }
+    
+    return info;
 }

@@ -10,6 +10,7 @@
 #include <libkern/OSMalloc.h>
 #include <sys/kern_control.h>
 #include <mach/mach_types.h>
+#include "NethookControl.h"
 
 #ifndef nethook_ANControlList_h
 #define nethook_ANControlList_h
@@ -18,6 +19,11 @@ typedef struct {
     uint32_t unit;
     kern_ctl_ref ctlref;
     boolean_t connected;
+    
+    // buffering
+    char * packetBuffer;
+    uint32_t bufferLength;
+    
     void * next;
 } ANControlListEntry;
 
@@ -35,5 +41,7 @@ __private_extern__ ANControlListEntry * ANControlListLookupByUnit(ANControlList 
 
 __private_extern__ ANControlListEntry * ANControlListEntryCreate(OSMallocTag tag, uint32_t unit, kern_ctl_ref ctlref);
 __private_extern__ void ANControlListEntryFree(OSMallocTag tag, ANControlListEntry * entry);
+__private_extern__ errno_t ANControlListEntryAppend(OSMallocTag tag, ANControlListEntry * entry, mbuf_t packet);
+__private_extern__ ANPacketInfo * ANControlListEntryGetPacket(OSMallocTag tag, ANControlListEntry * entry);
 
 #endif
