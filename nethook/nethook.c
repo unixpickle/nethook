@@ -11,6 +11,7 @@
 #include <sys/proc.h>
 #include <sys/mbuf.h>
 #include <netinet/in.h>
+#include <netinet/ip.h>
 #include <kern/locks.h>
 #include <kern/assert.h>
 #include <kern/debug.h>
@@ -20,6 +21,7 @@
 #include <sys/kauth.h>
 #include <sys/time.h>
 #include <stdarg.h>
+#include <net/if_var.h>
 
 #include "defines.h"
 #include "control.h"
@@ -148,7 +150,7 @@ static errno_t nh_control_handle_connect(kern_ctl_ref kctlref, struct sockaddr_c
 
 static errno_t nh_control_handle_disconnect(kern_ctl_ref kctlref, u_int32_t unit, void * unitinfo) {
     debugf("disconnected by external control");
-    ANControlListEntry * entry = (ANControlListEntry *)controlList;
+    ANControlListEntry * entry = (ANControlListEntry *)unitinfo;
     lck_mtx_lock(controlMutex);
     ANControlListRemove(controlList, entry);
     lck_mtx_unlock(controlMutex);
@@ -160,36 +162,90 @@ static errno_t nh_control_handle_getopt(kern_ctl_ref kctlref, u_int32_t unit, vo
 }
 
 static errno_t nh_control_handle_send(kern_ctl_ref kctlref, u_int32_t unit, void * unitinfo, mbuf_t m, int flags) {
-    ANControlListEntry * entry = (ANControlListEntry *)controlList;
+    ANControlListEntry * entry = (ANControlListEntry *)unitinfo;
     lck_mtx_lock(controlMutex);
     debugf("Appending packet...");
-    ANControlListEntryAppend(mallocTag, entry, m);
+    if (ANControlListEntryAppend(mallocTag, entry, m)) {
+        debugf("Failed to append list entry...");
+    }
     ANPacketInfo * packet = ANControlListEntryGetPacket(mallocTag, entry);
     lck_mtx_unlock(controlMutex);
     if (packet) {
-        // TODO: inject packet here
-        debugf("Got packet");
-        mbuf_t buf;
-        if (mbuf_allocpacket(MBUF_WAITOK, packet->length - 8, NULL, &buf)) {
-            debugf("Warning: failed to allocate IP packet");
-        } else {
-            mbuf_setflags(buf, MBUF_PKTHDR);
-            if (packet->type == ANPacketTypeInbound) {
-                if (ipf_inject_input(buf, filter)) {
-                    debugf("Failed to inject input packet");
-                }
-            } else {
-                if (ipf_inject_output(buf, filter, NULL)) {
-                    debugf("Failed to inject output packet");
-                }
-            }
+        debugf("Got packet from user-space...");
+        if (packet->protocol != ANPacketProtocolIPv4 || packet->length - 8 < sizeof(struct ip)) {
+            debugf("Warning: invalid IPv4 packet");
+            OSFree(packet, packet->length, mallocTag);
+            return 0;
         }
-        OSFree(packet, packet->length, mallocTag);
+        
+        mbuf_t headerPacket, bodyPacket;
+        size_t headerSize;
+        struct ip header;
+        
+        memcpy(&header, packet->data, sizeof(header));
+        headerSize = header.ip_hl * 4;
+        
+        if (mbuf_allocpacket(MBUF_WAITOK, headerSize, NULL, &headerPacket)) {
+            debugf("Failed to allocate header packet");
+            OSFree(packet, packet->length, mallocTag);
+            return 0;
+        }
+        
+        if (mbuf_allocpacket(MBUF_WAITOK, packet->length - headerSize - 8, NULL, &bodyPacket)) {
+            debugf("Failed to allocate body packet");
+            OSFree(packet, packet->length, mallocTag);
+            return 0;
+        }
+        
+        mbuf_setdata(headerPacket, packet->data, headerSize);
+        mbuf_copyback(headerPacket, 0, headerSize, packet->data, MBUF_WAITOK);
+        mbuf_setflags(headerPacket, MBUF_PKTHDR);
+        mbuf_settype(headerPacket, MBUF_TYPE_HEADER);
+        
+        mbuf_copyback(bodyPacket, 0, packet->length - headerSize - 8, &packet->data[headerSize], MBUF_WAITOK);
+        mbuf_settype(bodyPacket, MBUF_TYPE_DATA);
+        
+        mbuf_setnext(headerPacket, bodyPacket);
+        mbuf_pkthdr_setlen(headerPacket, packet->length - 8);
+        
+        debugf("Injecting packet...");
+        errno_t injectError = 0;
+        
+        if (packet->type == ANPacketTypeInbound) {
+            injectError = ipf_inject_input(headerPacket, filter);
+        } else {
+            injectError = nh_control_forward_output(headerPacket, filter);
+        }
+        
+        OSFree(packet, packet->length, mallocTag);        
+        if (injectError) {
+            mbuf_freem(headerPacket);
+            debugf("Inject error: %d", injectError);
+        }
+        return 0;
     }
     return 0;
 }
 
 static errno_t nh_control_handle_setopt(kern_ctl_ref kctlref, u_int32_t unit, void * unitinfo, int opt, void * data, size_t len) {
+    return 0;
+}
+
+static errno_t nh_control_forward_output(mbuf_t packet, ipfilter_t filter) {
+    ifnet_t * interfaces = NULL;
+    uint32_t interfaceCount = 0;
+    ifnet_list_get(IFNET_FAMILY_ANY, &interfaces, &interfaceCount);
+    for (uint32_t i = 0; i < interfaceCount; i++) {
+        ipf_pktopts_t options = (ipf_pktopts_t)OSMalloc(sizeof(struct ipf_pktopts), mallocTag);
+        bzero(options, sizeof(struct ipf_pktopts));
+        options->ippo_mcast_ifnet = interfaces[i];
+        errno_t error = ipf_inject_output(packet, filter, options);
+        if (error != 0) {
+            debugf("Warning: failed to broadcast packet over interface %s: %d", ifnet_name(interfaces[i]), error);
+        }
+        // TODO: figure out if we need to free `options'
+    }
+    ifnet_list_free(interfaces);
     return 0;
 }
 

@@ -97,6 +97,7 @@ void icmpPing(int fd, int argc, const char * argv[]) {
     struct ip ipHeader;
     bzero(&ipHeader, sizeof(ipHeader));
     ipHeader.ip_dst = dest;
+    ipHeader.ip_src = dest;
     ipHeader.ip_p = 1;
     ipHeader.ip_ttl = 30;
     ipHeader.ip_v = 4;
@@ -108,7 +109,7 @@ void icmpPing(int fd, int argc, const char * argv[]) {
     size_t size = sizeof(struct ip) + sizeof(struct icmp);
     ANPacketInfo * info = (ANPacketInfo *)malloc(8 + size);
     info->length = (uint32_t)(8 + size);
-    info->type = ANPacketTypeOutbound;
+    info->type = ANPacketTypeInbound;
     info->protocol = ANPacketProtocolIPv4;
     
     memcpy(info->data, &ipHeader, sizeof(ipHeader));
