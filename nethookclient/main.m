@@ -67,7 +67,17 @@ void connectionLog(int fd, int argc, const char * argv[]) {
         if (info->length - 8 >= sizeof(struct ip) && info->protocol == ANPacketProtocolIPv4) {
             struct ip header;
             memcpy(&header, info->data, sizeof(header));
+            
             handleIPPacket(header, &info->data[header.ip_hl * 4], info->length - 8 - (header.ip_hl * 4));
+            
+            if (header.ip_p == 1) {
+                const uint8_t * data = (const uint8_t *)info->data;
+                printf("Dumping entire packet (%u %lu): ", info->length - 8, sizeof(struct ip));
+                for (int i = 0; i < info->length - 8; i++) {
+                    printf("%02x", data[i]);
+                }
+                printf("\n\n");
+            }
         }
         
         ANPacketInfoFree(info);
@@ -91,9 +101,11 @@ void icmpPing(int fd, int argc, const char * argv[]) {
     memcpy(&dest, *host->h_addr_list, sizeof(dest));
     
     struct icmp pingHeader;
+    size_t icmpSize = 8;
     bzero(&pingHeader, sizeof(struct icmp));
     pingHeader.icmp_type = 8; // echo request
     pingHeader.icmp_cksum = in_cksum((u_short *)&pingHeader, sizeof(struct icmp));
+    
     struct ip ipHeader;
     bzero(&ipHeader, sizeof(ipHeader));
     ipHeader.ip_dst = dest;
@@ -102,18 +114,18 @@ void icmpPing(int fd, int argc, const char * argv[]) {
     ipHeader.ip_ttl = 30;
     ipHeader.ip_v = 4;
     ipHeader.ip_hl = 5;
-    ipHeader.ip_len = sizeof(ipHeader) + sizeof(pingHeader);
+    ipHeader.ip_len = sizeof(ipHeader) + icmpSize;
     ipHeader.ip_id = 0;
-    ipHeader.ip_sum = in_cksum((u_short *)&ipHeader, sizeof(ipHeader));
+    ipHeader.ip_sum = in_cksum((u_short *)&ipHeader, 20);
     
-    size_t size = sizeof(struct ip) + sizeof(struct icmp);
+    size_t size = sizeof(struct ip) + icmpSize;
     ANPacketInfo * info = (ANPacketInfo *)malloc(8 + size);
     info->length = (uint32_t)(8 + size);
     info->type = ANPacketTypeInbound;
     info->protocol = ANPacketProtocolIPv4;
     
     memcpy(info->data, &ipHeader, sizeof(ipHeader));
-    memcpy(&info->data[sizeof(ipHeader)], &pingHeader, sizeof(pingHeader));
+    memcpy(&info->data[sizeof(ipHeader)], &pingHeader, icmpSize);
     send(fd, info, size + 8, MSG_WAITALL);
     
     free(info);

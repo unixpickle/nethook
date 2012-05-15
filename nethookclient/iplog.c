@@ -33,6 +33,16 @@ void handleIPPacket (struct ip ipHeader, void * data, int length) {
         memcpy(&udpHeader, data, sizeof(udpHeader));
         int headerSize = 8;
         handleUDPPacket(ipHeader, udpHeader, &((char *)data)[headerSize], headerSize);
+    } else if (ipHeader.ip_p == 1) {
+        char source[32], dest[32];
+        strncpy(source, inet_ntoa(ipHeader.ip_src), 32);
+        strncpy(dest, inet_ntoa(ipHeader.ip_dst), 32);
+        printf("\nICMP %s to %s\n", source, dest);
+//        printf("Dumping entire packet: ");
+//        for (int i = 0; i < length; i++) {
+//            printf("%02x", ((const unsigned char *)data)[i]);
+//        }
+//        printf("\n\n");
     } else {
         char source[32], dest[32];
         strncpy(source, inet_ntoa(ipHeader.ip_src), 32);
