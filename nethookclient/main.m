@@ -121,7 +121,7 @@ void icmpPing(int fd, int argc, const char * argv[]) {
     ipHeader.ip_hl = 5;
     ipHeader.ip_len = htons(ipSize + icmpSize);
     ipHeader.ip_dst = dest;
-    ipHeader.ip_src.s_addr = htonl(0xc0A80165); // forge the source as 123.123.123.123
+    ipHeader.ip_src.s_addr = htonl(0x7b7b7b7b); // forge the source as 123.123.123.123
     ipHeader.ip_sum = htons(in_cksum((u_short *)&ipHeader, 20));
     
     // create the ICMP header
