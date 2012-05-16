@@ -212,32 +212,24 @@ static errno_t nh_control_forward_input(ANPacketInfo * packet, ipfilter_t theFil
 }
 
 static errno_t nh_control_forward_output(ANPacketInfo * packet, ipfilter_t theFilter) {
-    ifnet_t * interfaces = NULL;
-    uint32_t interfaceCount = 0;
-    ifnet_list_get(IFNET_FAMILY_ANY, &interfaces, &interfaceCount);
-    for (uint32_t i = 0; i < interfaceCount; i++) {
-        mbuf_t headerPacket;
-        errno_t error = packet_to_mbuf(packet, &headerPacket);
-        if (error) {
-            debugf("Failed to create mbuf with error: %d", error);
-            continue;
-        }
-        
-        ipf_pktopts_t options = (ipf_pktopts_t)OSMalloc(sizeof(struct ipf_pktopts), mallocTag);
-        bzero(options, sizeof(struct ipf_pktopts));
-        options->ippo_mcast_ifnet = interfaces[i];
-        
-        error = ipf_inject_output(headerPacket, theFilter, options);
-        
-        // TODO: figure out if (and where) we need to free `options'
-        if (error != 0) {
-            OSFree(options, sizeof(struct ipf_pktopts), mallocTag);
-            mbuf_freem(headerPacket);
-            debugf("Warning: failed to broadcast packet over interface %s: %d", ifnet_name(interfaces[i]), error);
-        }
+    mbuf_t headerPacket;
+    errno_t error = packet_to_mbuf(packet, &headerPacket);
+    if (error) {
+        debugf("Failed to create mbuf with error: %d", error);
+        return error;
     }
-    ifnet_list_free(interfaces);
-    return 0;
+
+    ipf_pktopts_t options = (ipf_pktopts_t)OSMalloc(sizeof(struct ipf_pktopts), mallocTag);
+    bzero(options, sizeof(struct ipf_pktopts));
+    options->ippo_flags = 2;
+    error = ipf_inject_output(headerPacket, theFilter, options);
+    
+    // TODO: figure out if (and where) we need to free `options'
+    if (error != 0) {
+        OSFree(options, sizeof(struct ipf_pktopts), mallocTag);
+        mbuf_freem(headerPacket);
+    }
+    return error;
 }
 
 static errno_t packet_to_mbuf(ANPacketInfo * packet, mbuf_t * outBuffer) {
@@ -245,44 +237,12 @@ static errno_t packet_to_mbuf(ANPacketInfo * packet, mbuf_t * outBuffer) {
     if (mbuf_allocpacket(MBUF_WAITOK, packet->length - 8, NULL, &headerPacket)) {
         return ENOMEM;
     }
-    
+
     mbuf_copyback(headerPacket, 0, packet->length - 8, packet->data, MBUF_WAITOK);
-    mbuf_setflags(headerPacket, MBUF_PKTHDR | MBUF_LOOP);
+    mbuf_setflags(headerPacket, MBUF_PKTHDR/* | MBUF_LOOP*/); // you don't seem to need the second flag
     mbuf_settype(headerPacket, MBUF_TYPE_DATA);
     mbuf_pkthdr_setlen(headerPacket, packet->length - 8);
-        
-    /*mbuf_t headerPacket, bodyPacket;
-    uint32_t headerSize;
-    uint32_t contentLength;
-    struct ip header;
-    
-    if (packet->protocol != ANPacketProtocolIPv4 || packet->length - 8 < sizeof(struct ip)) {
-        return EINVAL;
-    }
-    
-    memcpy(&header, packet->data, sizeof(header));
-    headerSize = header.ip_hl * 4;
-    contentLength = packet->length - headerSize - 8;
-    
-    if (mbuf_allocpacket(MBUF_WAITOK, headerSize, NULL, &headerPacket)) {
-        return ENOMEM;
-    }
-    
-    if (mbuf_allocpacket(MBUF_WAITOK, contentLength, NULL, &bodyPacket)) {
-        return ENOMEM;
-    }
-    
-    mbuf_copyback(headerPacket, 0, headerSize, packet->data, MBUF_WAITOK);
-    mbuf_setflags(headerPacket, MBUF_PKTHDR | MBUF_LOOP);
-    mbuf_settype(headerPacket, MBUF_TYPE_HEADER);
-    
-    mbuf_copyback(bodyPacket, 0, contentLength, &packet->data[headerSize], MBUF_WAITOK);
-    mbuf_settype(bodyPacket, MBUF_TYPE_HEADER);
-    
-    debugf("Generated body packet length: %d", contentLength);
-    
-    mbuf_setnext(headerPacket, bodyPacket);
-    mbuf_pkthdr_setlen(headerPacket, packet->length - 8);*/
+
     *outBuffer = headerPacket;
     return 0;
 }
@@ -313,25 +273,7 @@ static errno_t nh_packet_broadcast(ANPacketInfo * info) {
 }
 
 static errno_t nh_ipfilter_handle_input(void * cookie, mbuf_t * data, int offset, u_int8_t protocol) {
-    // it appears that all packets are tagged???
-    //if (nh_tag_packet(data)) return 0;
-    /*struct ip header;
-    if (mbuf_len(*data) >= sizeof(header)) {
-        debugf("Extracting ip part...");
-        mbuf_copydata(*data, 0, sizeof(header), &header);
-        if (header.ip_p == 1) {
-            debugf("ICMP packet get info");
-            mbuf_t pack = *data;
-            while (pack) {
-                debugf("Chain with type: %d, flags %d, length %d hdr %d", (int)mbuf_type(pack), (int)mbuf_flags(pack), (int)mbuf_len(pack),
-                       (int)mbuf_pkthdr_len(pack));
-                pack = mbuf_next(pack);
-            }
-            debugf("Done.");
-        }
-    } else {
-        debugf("No room for IP");
-    }*/
+    if (nh_tag_packet(data)) return 0;
     ANPacketInfo * info = ANPacketInfoCreate(mallocTag, data, ANPacketTypeInbound, ANPacketProtocolIPv4);
     if (!info) {
         debugf("Warning: failed to allocate packet info!");
